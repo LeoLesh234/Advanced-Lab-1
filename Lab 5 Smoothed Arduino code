@@ -1,0 +1,64 @@
+const int ledPin = 9;       // pin that the LED is attached to
+const int TWOPI = 2 * 3.1415926;
+
+int brightness;
+unsigned long currentTime = 0;
+unsigned long lastTime = 0;
+const unsigned long intervalBetweenData = 1000;
+
+// Variables for averaging
+const int numReadings = 10;  
+int readings[numReadings];  
+int readIndex = 0;           
+int total = 0;               
+int average = 0;            
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+
+  // Initialize serial communication
+  Serial.begin(500000);
+
+  // Initialize all the readings to 0
+  for (int thisReading = 0; thisReading < numReadings; thisReading++) {
+    readings[thisReading] = 0;
+  }
+}
+
+void loop() {
+  // LED brightness control
+  brightness = 100 + 50 * sin(1.0 * TWOPI * millis() / 1000);
+  analogWrite(ledPin, brightness);
+  delay(5);
+
+  // Data logging
+  currentTime = micros();
+  if (currentTime - lastTime >= intervalBetweenData) {
+    lastTime += intervalBetweenData;
+
+    // Remove the last reading from the total
+    total = total - readings[readIndex];
+
+    // Read the sensor value
+    readings[readIndex] = analogRead(A0);
+
+    // Add the new reading to the total
+    total = total + readings[readIndex];
+
+    // Advance the index for the next reading
+    readIndex = readIndex + 1;
+
+    // If we've reached the end of the array, reset the index
+    if (readIndex >= numReadings) {
+      readIndex = 0;
+    }
+
+    // Calculate the average of the readings
+    average = total / numReadings;
+
+    // Send the data to the serial monitor
+    Serial.print(currentTime / 1000); // Time in milliseconds
+    Serial.print(',');
+    Serial.println(average);  // Averaged sensor value
+  }
+}
