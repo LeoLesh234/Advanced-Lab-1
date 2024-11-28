@@ -1,0 +1,41 @@
+// Pin definitions
+const int outputPin = 9;  // Digital pin for tone output (PWM capable)
+const int inputPin = A0;  // Analog pin to measure the signal
+
+// Variables for storing the readings
+const int numReadings = 80;  // Number of readings to take (80 ms of data at 1 ms intervals)
+unsigned long timestamps[numReadings];  // Array to store timestamps
+int readings[numReadings];              // Array to store analog readings
+
+void setup() {
+  // Start serial communication
+  Serial.begin(9600);
+  
+  // Generate a 60 Hz tone on the output pin
+  tone(outputPin, 75);  // OUR 60-100 Hz SIGNAL 
+
+  // Allow time for stabilization
+  delay(100);
+}
+
+void loop() {
+  // Collect readings at 1 ms intervals
+  for (int i = 0; i < numReadings; i++) {
+    timestamps[i] = millis();       //  time in milliseconds
+    readings[i] = analogRead(inputPin);  
+    delay(1);                       // 1 ms between readings
+  }
+
+  // Stop the tone temporarily
+  noTone(outputPin);
+
+  // Print readings in "time, value" format
+  for (int i = 0; i < numReadings; i++) {
+    Serial.print(timestamps[i]);  
+    Serial.print(", ");            
+    Serial.println(readings[i]);  
+  }
+
+  
+  delay(5000);  
+}
