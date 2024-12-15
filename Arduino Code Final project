@@ -1,0 +1,39 @@
+unsigned long previousMillis = 0;  // Store the last time the data was recorded
+const long interval = 10;  // Interval to wait (100 ms = 10 readings per second)
+
+void setup() {
+  Serial.begin(9600);  // Start serial communication at 9600 baud
+  // Print the column headers for easier reading
+  Serial.println("Time(ms), X-axis (V), Y-axis (V), Z-axis (V)");
+}
+
+void loop() {
+  unsigned long currentMillis = millis();  // Get the current time
+
+  // Only read data at the set interval
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+
+    // Read the analog values from the X, Y, and Z axes (A0, A1, A2)
+    int rawX = analogRead(A0);
+    int rawY = analogRead(A1);
+    int rawZ = analogRead(A2);
+
+    // Convert raw analog values (0-1023) to voltage (3.3V reference for 3.3V supply)
+    float voltageX = rawX * (3.3 / 1023.0);
+    float voltageY = rawY * (3.3 / 1023.0);
+    float voltageZ = rawZ * (3.3 / 1023.0);
+
+    // Get the current time in milliseconds
+    long currentTime = millis();
+
+    // Print the time, X, Y, and Z axis voltages as four columns
+    Serial.print(currentTime);       // Time in milliseconds
+    Serial.print(", ");
+    Serial.print(voltageX, 3);       // X-axis voltage with 3 decimal places
+    Serial.print(", ");
+    Serial.print(voltageY, 3);       // Y-axis voltage with 3 decimal places
+    Serial.print(", ");
+    Serial.println(voltageZ, 3);     // Z-axis voltage with 3 decimal places
+  }
+}
